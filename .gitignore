@@ -33,4 +33,7 @@ Thumbs.db
 
 # ── Docker volumes (local dev) ─────────────────────��──────
 data/
+!06-lab-complete/data/
+06-lab-complete/data/**
+!06-lab-complete/data/local_index.json
 volumes/
