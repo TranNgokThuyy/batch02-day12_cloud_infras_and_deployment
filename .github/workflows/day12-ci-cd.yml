@@ -85,6 +85,15 @@ jobs:
           railway --version
           echo "RAILWAY_TOKEN is present. Railway deploy command will validate it."
 
+      - name: Link Railway project
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          railway link \
+            --project "$RAILWAY_PROJECT_ID" \
+            --service "$RAILWAY_SERVICE" \
+            --environment "$RAILWAY_ENVIRONMENT" \
+            --json
+
       - name: Deploy Railway service
         working-directory: ${{ env.PROJECT_DIR }}
         run: |
@@ -100,7 +109,6 @@ jobs:
         run: |
           for attempt in $(seq 1 30); do
             railway deployment list \
-              --project "$RAILWAY_PROJECT_ID" \
               --service "$RAILWAY_SERVICE" \
               --environment "$RAILWAY_ENVIRONMENT" \
               --json > deployments.json
