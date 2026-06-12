@@ -82,11 +82,8 @@ jobs:
             exit 1
           fi
 
-          if ! railway whoami; then
-            echo "::error::RAILWAY_TOKEN exists but Railway rejected it."
-            echo "Create a new Railway Account Token, then update GitHub secret RAILWAY_TOKEN."
-            exit 1
-          fi
+          railway --version
+          echo "RAILWAY_TOKEN is present. Railway deploy command will validate it."
 
       - name: Deploy Railway service
         working-directory: ${{ env.PROJECT_DIR }}
