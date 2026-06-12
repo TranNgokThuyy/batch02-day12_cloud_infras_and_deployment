@@ -16,6 +16,7 @@ on:
   workflow_dispatch:
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   PROJECT_DIR: 06-lab-complete
   RAILWAY_PROJECT_ID: 0b28c4c2-0267-43d6-825f-daab8f6594f5
   RAILWAY_SERVICE: agent
@@ -62,6 +63,8 @@ jobs:
     needs: ci
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: production
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
     steps:
       - name: Checkout
@@ -70,16 +73,24 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Deploy Railway service
-        working-directory: ${{ env.PROJECT_DIR }}
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      - name: Verify Railway token
         run: |
           if [ -z "$RAILWAY_TOKEN" ]; then
-            echo "Missing GitHub secret RAILWAY_TOKEN"
+            echo "::error::Missing GitHub secret RAILWAY_TOKEN."
+            echo "Add it in GitHub: Settings -> Secrets and variables -> Actions."
+            echo "If you added it under Environments, use environment name 'production'."
             exit 1
           fi
 
+          if ! railway whoami; then
+            echo "::error::RAILWAY_TOKEN exists but Railway rejected it."
+            echo "Create a new Railway Account Token, then update GitHub secret RAILWAY_TOKEN."
+            exit 1
+          fi
+
+      - name: Deploy Railway service
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
           railway up \
             --project "$RAILWAY_PROJECT_ID" \
             --service "$RAILWAY_SERVICE" \
@@ -89,8 +100,6 @@ jobs:
             --message "GitHub Actions deploy $GITHUB_SHA"
 
       - name: Wait for Railway deployment
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           for attempt in $(seq 1 30); do
             railway deployment list \
