@@ -107,29 +107,19 @@ railway.cmd up
 railway.cmd domain
 ```
 
-## GitHub CI/CD
+## Deployment Mode
 
-GitHub Actions workflow:
+This submission uses manual Railway deployment.
 
-```text
-.github/workflows/day12-ci-cd.yml
-```
+Recommended manual verification after every deploy:
 
-Required GitHub secret:
+- `GET /health`
+- `GET /ready`
+- `POST /ask` without API key should return `401`
+- `POST /ask` with `X-API-Key` should return `200`
 
-- `RAILWAY_TOKEN`
-
-Optional GitHub secret:
-
-- `DEPLOYED_API_KEY`
-
-CI runs on pull requests and pushes to `main`. CD deploys to Railway on pushes to `main`, then verifies:
-
-```text
-GET /health
-GET /ready
-POST /ask (optional, when DEPLOYED_API_KEY is configured)
-```
+Keep Railway and API secrets in Railway variables only. Do not commit platform
+tokens or API keys into the repository.
 
 ## Screenshots
 

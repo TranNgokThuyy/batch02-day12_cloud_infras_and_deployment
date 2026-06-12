@@ -1,142 +1,133 @@
-# Day 12 — Deployment: Đưa Agent Lên Cloud
+# Day 12 - Cloud Infrastructure and Deployment
 
-> **AICB-P1 · VinUniversity 2026**  
-> Repository thực hành đi kèm bài giảng Day 12.  
-> Mỗi phần có ví dụ **cơ bản** (hiểu concept) và **chuyên sâu** (production-ready).
+Repository thuc hanh cho bai Day 12: dua mot AI agent tu localhost len moi
+truong production.
 
----
+Noi dung tap trung vao:
 
-## Cấu Trúc Project
+- Khac biet giua development va production
+- Docker va Docker Compose
+- Deploy len Railway, Render, hoac Cloud Run
+- API security, rate limiting, cost guard
+- Health check, readiness check, stateless design
+- Final project trong `06-lab-complete`
 
+## Project Structure
+
+```text
+batch02-day12_cloud_infras_and_deployment/
+  01-localhost-vs-production/
+    develop/
+    production/
+  02-docker/
+    develop/
+    production/
+  03-cloud-deployment/
+    railway/
+    render/
+    production-cloud-run/
+  04-api-gateway/
+    develop/
+    production/
+  05-scaling-reliability/
+    develop/
+    production/
+  06-lab-complete/
+    app/
+    Dockerfile
+    docker-compose.yml
+    railway.toml
+    render.yaml
+    README.md
+    DEPLOYMENT.md
+  utils/
 ```
-day12_ha-tang-cloud_va_deployment/
-├── 01-localhost-vs-production/     # Section 1: Dev ≠ Production
-│   ├── develop/                      #   Agent "đúng kiểu localhost"
-│   └── production/                   #   12-Factor compliant agent
-│
-├── 02-docker/                      # Section 2: Containerization
-│   ├── develop/                      #   Dockerfile đơn giản
-│   └── production/                   #   Multi-stage + Docker Compose stack
-│
-├── 03-cloud-deployment/            # Section 3: Cloud Options
-│   ├── railway/                    #   Deploy Railway (< 5 phút)
-│   ├── render/                     #   Deploy Render + render.yaml
-│   └── production-cloud-run/         #   GCP Cloud Run + CI/CD
-│
-├── 04-api-gateway/                 # Section 4: Security
-│   ├── develop/                      #   API Key authentication
-│   └── production/                   #   JWT + Rate Limiting + Cost Guard
-│
-├── 05-scaling-reliability/         # Section 5: Scale & Reliability
-│   ├── develop/                      #   Health check + graceful shutdown
-│   └── production/                   #   Stateless + Redis + Nginx LB
-│
-├── 06-lab-complete/                # Lab 12: Production-ready agent
-│   └── (full project kết hợp tất cả)
-│
-└── utils/                          # Mock LLM dùng chung (không cần API key)
-```
 
----
+## Quick Start
 
-## 🚀 Bắt Đầu Nhanh
-
-**Muốn thử ngay?** → [QUICK_START.md](QUICK_START.md) (5 phút)
-
-**Muốn học kỹ?** → [CODE_LAB.md](CODE_LAB.md) (3-4 giờ)
-
-## Cách Học
-
-| Bước | Làm gì |
-|------|--------|
-| 0 | **[Khuyến nghị]** Đọc [QUICK_START.md](QUICK_START.md) để thử nhanh |
-| 1 | Đọc [CODE_LAB.md](CODE_LAB.md) để hiểu chi tiết |
-| 2 | Chạy ví dụ **basic** trước — hiểu concept |
-| 3 | So sánh với ví dụ **advanced** — thấy sự khác biệt |
-| 4 | Tự làm Lab 06 từ đầu trước khi xem solution |
-| 5 | Tham khảo [QUICK_REFERENCE.md](QUICK_REFERENCE.md) khi cần |
-| 6 | Xem [TROUBLESHOOTING.md](TROUBLESHOOTING.md) khi gặp lỗi |
-
----
-
-## Yêu Cầu
+Final project nam trong:
 
 ```bash
-python 3.11+
-docker & docker compose
+cd batch02-day12_cloud_infras_and_deployment/06-lab-complete
 ```
 
-Mỗi folder có `requirements.txt` riêng. Không cần API key thật — các ví dụ dùng **mock LLM** để chạy offline.
+Chay local bang Docker Compose:
 
----
-
-## Sections
-
-| # | Folder | Concept chính |
-|---|--------|--------------|
-| 1 | `01-localhost-vs-production` | Dev/prod gap, 12-factor, secrets |
-| 2 | `02-docker` | Dockerfile, multi-stage, docker-compose |
-| 3 | `03-cloud-deployment` | Railway, Render, Cloud Run |
-| 4 | `04-api-gateway` | Auth, rate limiting, cost protection |
-| 5 | `05-scaling-reliability` | Health check, stateless, rolling deploy |
-| 6 | `06-lab-complete` | **Full production agent** |
-
----
-
-## 📚 Lab Materials
-
-Chúng tôi đã chuẩn bị đầy đủ tài liệu hướng dẫn:
-
-### Cho Sinh Viên
-
-| Tài liệu | Mô tả | Thời gian |
-|----------|-------|-----------|
-| **[CODE_LAB.md](CODE_LAB.md)** | Hướng dẫn lab chi tiết từng bước | 3-4 giờ |
-| **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** | Cheat sheet các lệnh và patterns | Tra cứu |
-| **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** | Giải quyết lỗi thường gặp | Khi cần |
-
-### Cho Giảng Viên
-
-| Tài liệu | Mô tả |
-|----------|-------|
-| **[INSTRUCTOR_GUIDE.md](INSTRUCTOR_GUIDE.md)** | Hướng dẫn chấm điểm và đánh giá |
-
-### Cách Sử Dụng
-
-1. **Trước lab:** Đọc [CODE_LAB.md](CODE_LAB.md) để hiểu tổng quan
-2. **Trong lab:** Làm theo từng Part, tham khảo [QUICK_REFERENCE.md](QUICK_REFERENCE.md)
-3. **Gặp lỗi:** Xem [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-4. **Sau lab:** Nộp Part 6 Final Project để chấm điểm
----
-
-## CI/CD GitHub Actions
-
-Final project includes a GitHub Actions workflow:
-
-```text
-.github/workflows/day12-ci-cd.yml
+```bash
+docker compose up --build
 ```
 
-Pipeline behavior:
+Kiem tra service:
 
-- Pull requests and pushes to `main`: install dependencies, compile Python, run `06-lab-complete/check_production_ready.py`, validate Docker Compose, and build the Docker image.
-- Pushes to `main`: deploy `06-lab-complete` to Railway service `agent`.
-- After deploy: smoke test public `/health` and `/ready`; optionally test authenticated `/ask`.
-
-Required GitHub secret:
-
-```text
-RAILWAY_TOKEN
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/ready
 ```
 
-Optional GitHub secret:
+Gui request co API key:
 
-```text
-DEPLOYED_API_KEY
+```bash
+curl -X POST http://localhost:8000/ask \
+  -H "X-API-Key: dev-key-change-me-in-production" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":"test","question":"Hello"}'
 ```
 
-Current Railway URL:
+## Requirements
 
-```text
-https://agent-production-df3b.up.railway.app
+- Python 3.11+
+- Docker
+- Docker Compose
+- Railway CLI, neu deploy len Railway
+
+Khong can OpenAI API key that cho lab nay. Code mac dinh dung mock LLM de co
+the chay offline.
+
+## Main Lab Materials
+
+- `CODE_LAB.md`: huong dan lab chi tiet
+- `QUICK_START.md`: chay nhanh trong vai phut
+- `QUICK_REFERENCE.md`: cheat sheet lenh va pattern
+- `TROUBLESHOOTING.md`: loi thuong gap va cach sua
+- `INSTRUCTOR_GUIDE.md`: huong dan cham diem
+
+## Manual Deployment
+
+Repository nay uu tien deploy thu cong de de debug trong qua trinh hoc.
+
+Railway flow co ban:
+
+```bash
+cd 06-lab-complete
+npm i -g @railway/cli
+railway login
+railway init
+railway variables set ENVIRONMENT=production
+railway variables set PORT=8000
+railway variables set AGENT_API_KEY=replace-with-a-long-secret
+railway variables set JWT_SECRET=replace-with-another-long-secret
+railway up
+railway domain
 ```
+
+Tren Windows PowerShell, neu `railway.ps1` bi chan boi execution policy, dung:
+
+```powershell
+railway.cmd login
+railway.cmd init
+railway.cmd up
+railway.cmd domain
+```
+
+Sau khi deploy, cap nhat URL va bang chung test trong
+`06-lab-complete/DEPLOYMENT.md`.
+
+## Final Submission Checklist
+
+- Docker Compose chay duoc local
+- `python check_production_ready.py` pass
+- Public URL deploy thanh cong
+- `/health` va `/ready` tra ve 200
+- `/ask` yeu cau `X-API-Key`
+- Rate limit va Redis-backed state hoat dong
+- `DEPLOYMENT.md` co URL va lenh test
