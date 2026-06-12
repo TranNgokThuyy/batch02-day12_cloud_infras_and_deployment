@@ -107,3 +107,36 @@ Chúng tôi đã chuẩn bị đầy đủ tài liệu hướng dẫn:
 2. **Trong lab:** Làm theo từng Part, tham khảo [QUICK_REFERENCE.md](QUICK_REFERENCE.md)
 3. **Gặp lỗi:** Xem [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 4. **Sau lab:** Nộp Part 6 Final Project để chấm điểm
+---
+
+## CI/CD GitHub Actions
+
+Final project includes a GitHub Actions workflow:
+
+```text
+.github/workflows/day12-ci-cd.yml
+```
+
+Pipeline behavior:
+
+- Pull requests and pushes to `main`: install dependencies, compile Python, run `06-lab-complete/check_production_ready.py`, validate Docker Compose, and build the Docker image.
+- Pushes to `main`: deploy `06-lab-complete` to Railway service `agent`.
+- After deploy: smoke test public `/health` and `/ready`; optionally test authenticated `/ask`.
+
+Required GitHub secret:
+
+```text
+RAILWAY_TOKEN
+```
+
+Optional GitHub secret:
+
+```text
+DEPLOYED_API_KEY
+```
+
+Current Railway URL:
+
+```text
+https://agent-production-df3b.up.railway.app
+```

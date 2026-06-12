@@ -107,6 +107,30 @@ railway.cmd up
 railway.cmd domain
 ```
 
+## GitHub CI/CD
+
+GitHub Actions workflow:
+
+```text
+.github/workflows/day12-ci-cd.yml
+```
+
+Required GitHub secret:
+
+- `RAILWAY_TOKEN`
+
+Optional GitHub secret:
+
+- `DEPLOYED_API_KEY`
+
+CI runs on pull requests and pushes to `main`. CD deploys to Railway on pushes to `main`, then verifies:
+
+```text
+GET /health
+GET /ready
+POST /ask (optional, when DEPLOYED_API_KEY is configured)
+```
+
 ## Screenshots
 
 Add Railway dashboard screenshots before final submission if your instructor requires image evidence:

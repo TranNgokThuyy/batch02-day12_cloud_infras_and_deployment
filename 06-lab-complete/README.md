@@ -179,3 +179,43 @@ Current Railway URL:
 ```text
 https://agent-production-df3b.up.railway.app
 ```
+
+## GitHub CI/CD
+
+This repository includes a GitHub Actions workflow:
+
+```text
+.github/workflows/day12-ci-cd.yml
+```
+
+What it does:
+
+- On pull requests and pushes to `main`, it installs dependencies, compiles Python, runs `check_production_ready.py`, validates Docker Compose, and builds the Docker image.
+- On pushes to `main`, it deploys `06-lab-complete` to the Railway `agent` service.
+- After deploy, it checks the public `/health` and `/ready` endpoints.
+- If `DEPLOYED_API_KEY` is set, it also runs an authenticated `/ask` smoke test.
+
+Required GitHub secrets:
+
+```text
+RAILWAY_TOKEN
+```
+
+Optional GitHub secret:
+
+```text
+DEPLOYED_API_KEY
+```
+
+To add secrets:
+
+1. Open your GitHub repository.
+2. Go to `Settings` -> `Secrets and variables` -> `Actions`.
+3. Add `RAILWAY_TOKEN`.
+4. Optionally add `DEPLOYED_API_KEY` with the same value as Railway `AGENT_API_KEY`.
+
+Create a Railway token from Railway dashboard:
+
+```text
+Account Settings -> Tokens -> Create Token
+```
