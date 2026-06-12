@@ -1,12 +1,10 @@
-"""Production-ready AI agent for Day 12.
+"""Production-ready Lab09 RAG chatbot API for Day 12.
 
-The application is intentionally stateless: conversation history, rate-limit
-windows, and monthly budget usage all live in Redis so multiple agent
-instances can serve the same users.
+The original Lab09 assignment was a Streamlit RAG chatbot. This service wraps
+that RAG supervisor-workers core in a production-ready FastAPI API.
 """
 import json
 import logging
-import re
 import signal
 import time
 from contextlib import asynccontextmanager
@@ -22,7 +20,7 @@ from app.auth import verify_api_key
 from app.config import settings
 from app.cost_guard import estimate_cost_usd, monthly_cost_guard
 from app.rate_limiter import rate_limiter
-from utils.mock_llm import ask as llm_ask
+from src.supervisor_workers import supervisor_answer
 
 
 class JSONFormatter(logging.Formatter):
@@ -128,6 +126,8 @@ class AskResponse(BaseModel):
     question: str
     answer: str
     model: str
+    sources: list[dict] = Field(default_factory=list)
+    trace: dict = Field(default_factory=dict)
     history_messages: int
     cost_usd: float
     timestamp: str
@@ -164,17 +164,12 @@ def append_history(user_id: str, role: str, content: str) -> None:
     redis_client.expire(key, settings.history_ttl_seconds)
 
 
-def build_answer(question: str, history: list[dict[str, str]]) -> str:
-    question_lower = question.lower()
-    if "what is my name" in question_lower or "what's my name" in question_lower:
-        for message in reversed(history):
-            if message.get("role") != "user":
-                continue
-            match = re.search(r"\bmy name is\s+([A-Za-z][A-Za-z '-]{0,60})", message["content"], re.I)
-            if match:
-                name = match.group(1).strip(" .,!?:;")
-                return f"Your name is {name}."
-    return llm_ask(question)
+def build_rag_response(question: str) -> dict:
+    return supervisor_answer(
+        question,
+        top_k=settings.rag_top_k,
+        score_threshold=settings.rag_score_threshold,
+    )
 
 
 @app.get("/", tags=["Info"])
@@ -189,6 +184,8 @@ def root():
             "ready": "GET /ready",
             "metrics": "GET /metrics (requires X-API-Key)",
         },
+        "source_project": "Lab09 Lab_Assignment RAG chatbot core",
+        "pattern": "Supervisor -> Retrieval Worker -> Evidence Worker -> Generation Worker",
     }
 
 
@@ -205,7 +202,10 @@ async def ask_agent(
     estimated_input_tokens = len(body.question.split()) * 2
     monthly_cost_guard.check(redis_client, user_id, estimate_cost_usd(estimated_input_tokens, 0))
 
-    answer = build_answer(body.question, history)
+    rag_result = build_rag_response(body.question)
+    answer = str(rag_result.get("answer", "I cannot verify this information"))
+    sources = rag_result.get("sources", [])
+    trace = rag_result.get("trace", {})
     estimated_output_tokens = len(answer.split()) * 2
     request_cost = estimate_cost_usd(estimated_input_tokens, estimated_output_tokens)
     monthly_cost_guard.record(redis_client, user_id, request_cost)
@@ -220,6 +220,7 @@ async def ask_agent(
                 "user_id": user_id,
                 "client": str(request.client.host) if request.client else "unknown",
                 "cost_usd": request_cost,
+                "source_count": len(sources),
             }
         )
     )
@@ -229,6 +230,8 @@ async def ask_agent(
         question=body.question,
         answer=answer,
         model=settings.llm_model,
+        sources=sources,
+        trace=trace,
         history_messages=len(history) + 2,
         cost_usd=round(request_cost, 6),
         timestamp=datetime.now(timezone.utc).isoformat(),

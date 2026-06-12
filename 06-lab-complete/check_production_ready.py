@@ -31,7 +31,7 @@ def run_checks() -> bool:
         ".dockerignore",
         ".env.example",
         "requirements.txt",
-        "utils/mock_llm.py",
+        "data/local_index.json",
         "MISSION_ANSWERS.md",
         "DEPLOYMENT.md",
     ]:
@@ -52,6 +52,9 @@ def run_checks() -> bool:
         "app/auth.py",
         "app/rate_limiter.py",
         "app/cost_guard.py",
+        "src/supervisor_workers.py",
+        "src/task9_retrieval_pipeline.py",
+        "src/task10_generation.py",
     ]:
         results.append(check(f"{filename} exists", os.path.exists(os.path.join(base, filename))))
 
@@ -83,6 +86,7 @@ def run_checks() -> bool:
     results.append(check("Redis conversation history used", "history:" in main_py and "lrange" in main_py))
     results.append(check("Graceful shutdown signal handling", "SIGTERM" in main_py))
     results.append(check("Structured JSON logging", "JSONFormatter" in main_py or "json.dumps" in main_py))
+    results.append(check("Lab09 RAG supervisor used", "supervisor_answer" in main_py))
 
     rate_path = os.path.join(base, "app", "rate_limiter.py")
     rate_py = read_text(rate_path) if os.path.exists(rate_path) else ""

@@ -64,14 +64,30 @@ The agent exposes HTTP endpoints. Redis stores rate-limit windows, monthly cost 
 
 ## Part 3: Cloud Deployment
 
+### Project replacement
+
+The original Day 12 sample agent was replaced with the Lab09 `Lab_Assignment`
+RAG chatbot core. The Streamlit-facing function `supervisor_answer()` is now
+served through a production FastAPI API.
+
+Productionization changes:
+
+1. Wrapped the Lab09 RAG supervisor-workers pipeline with `POST /ask`.
+2. Added environment-based config in `app/config.py`.
+3. Added `GET /health` and `GET /ready`.
+4. Added API key authentication with `X-API-Key`.
+5. Kept Redis-backed rate limiting, request history, and monthly cost guard.
+6. Packaged the service with Docker and Railway config.
+7. Documented deployment variables and public API test commands.
+
 ### Exercise 3.1: Railway deployment
 
 - Platform: Railway
-- URL: `https://agent-production-df3b.up.railway.app`
-- Status: deployed successfully on Railway.
+- URL: update in `DEPLOYMENT.md` after Railway deployment.
+- Status: ready for Railway deployment.
 - Screenshot: add dashboard screenshots under `screenshots/` if image evidence is required.
-- Local deployment readiness: Docker Compose stack is healthy and `check_production_ready.py` passes `33/33`.
-- Public readiness: `/health` and `/ready` both return `200`.
+- Local deployment readiness: `check_production_ready.py` passes all checks.
+- Public readiness: `/health` and `/ready` should both return `200` after deploy.
 
 ### Exercise 3.2: Railway vs Render config
 
@@ -164,6 +180,6 @@ Answer: Your name is Alice.
 
 ```text
 python check_production_ready.py
-Result: 33/33 checks passed (100%)
+Result: all checks passed (100%)
 PRODUCTION READY
 ```

@@ -17,11 +17,16 @@ class Settings:
     debug: bool = field(default_factory=lambda: os.getenv("DEBUG", "false").lower() == "true")
     log_level: str = field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO"))
 
-    app_name: str = field(default_factory=lambda: os.getenv("APP_NAME", "Production AI Agent"))
+    app_name: str = field(default_factory=lambda: os.getenv("APP_NAME", "Lab09 RAG Chatbot API"))
     app_version: str = field(default_factory=lambda: os.getenv("APP_VERSION", "1.0.0"))
 
     openai_api_key: str = field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
-    llm_model: str = field(default_factory=lambda: os.getenv("LLM_MODEL", "gpt-4o-mini"))
+    llm_model: str = field(default_factory=lambda: os.getenv("OPENAI_MODEL", os.getenv("LLM_MODEL", "gpt-4o-mini")))
+
+    rag_top_k: int = field(default_factory=lambda: int(os.getenv("RAG_TOP_K", "5")))
+    rag_score_threshold: float = field(
+        default_factory=lambda: float(os.getenv("RAG_SCORE_THRESHOLD", "0.05"))
+    )
 
     agent_api_key: str = field(
         default_factory=lambda: os.getenv("AGENT_API_KEY", "dev-key-change-me-in-production")
@@ -51,7 +56,7 @@ class Settings:
             if self.jwt_secret == "dev-jwt-secret":
                 raise ValueError("JWT_SECRET must be set in production")
         if not self.openai_api_key:
-            logger.warning("OPENAI_API_KEY not set; using mock LLM")
+            logger.warning("OPENAI_API_KEY not set; using extractive RAG fallback")
         return self
 
 
